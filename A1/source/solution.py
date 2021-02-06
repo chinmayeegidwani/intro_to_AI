@@ -45,7 +45,11 @@ def heur_alternate(state):
     #heur_manhattan_distance has flaws.
     #Write a heuristic function that improves upon heur_manhattan_distance to estimate distance between the current state and the goal.
     #Your function should return a numeric value for the estimate of the distance to the goal.
-    return 0
+    total_dist = 0
+    for snowball in state.snowballs:
+      total_dist += abs(snowball[0] - state.destination[0]) + abs(snowball[1] - state.destination[1])
+
+    return total_dist
 
 def heur_zero(state):
     '''Zero Heuristic can be used to make A* search perform uniform cost search'''
@@ -95,6 +99,8 @@ def anytime_gbfs(initial_state, heur_fn, timebound = 5):
   result = s.search(timebound)
   cost_bound = (float("inf"), float("inf"), float("inf")) # g, h, g+h
   return_val = False
+  #if(result):
+    #print("here")
   while (start_time < end_time):
     if result:
       # pruning step
@@ -102,6 +108,7 @@ def anytime_gbfs(initial_state, heur_fn, timebound = 5):
         cost_bound = (result.gval, result.gval, result.gval * 2)
         return_val = result
     else:
+      #print("here2")
       return return_val
     # perform search
     result = s.search(timebound, cost_bound)

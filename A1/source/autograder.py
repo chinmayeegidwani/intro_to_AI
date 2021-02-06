@@ -7,7 +7,7 @@ from snowman import snowman_goal_state
 
 #Select what to test
 test_time_astar = False
-test_time_gbfs = False
+test_time_gbfs = True
 test_manhattan = False
 test_fval_function = False
 test_anytime_gbfs = True
