@@ -49,7 +49,7 @@ def heur_alternate(state):
     # General idea: Manhattan distance misses several specific cases that end up misleading the search
     # ie if the snowball is in the corner, and the destination is not that corner, it can't be moved to the destination
 
-    
+
     total_dist = 0
     for snowball in state.snowballs:
       x = snowball[0]
@@ -61,7 +61,8 @@ def heur_alternate(state):
         bottom_left = (0, 0)
         bottom_right = (state.width, 0)
         if(snowball == top_left or snowball == top_right or snowball == bottom_left or snowball == bottom_right):
-          return float("inf")
+          if(state.destination != snowball):
+            return float("inf")
 
         # wall cases
         if((y == 0 or y == state.height -1) and (y != state.destination[1])):
@@ -70,7 +71,8 @@ def heur_alternate(state):
           return float("inf")
 
         total_dist += abs(snowball[0] - state.destination[0]) + abs(snowball[1] - state.destination[1])
-
+      else:
+        return 0
 
 
     return total_dist
