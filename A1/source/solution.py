@@ -45,9 +45,33 @@ def heur_alternate(state):
     #heur_manhattan_distance has flaws.
     #Write a heuristic function that improves upon heur_manhattan_distance to estimate distance between the current state and the goal.
     #Your function should return a numeric value for the estimate of the distance to the goal.
+    
+    # General idea: Manhattan distance misses several specific cases that end up misleading the search
+    # ie if the snowball is in the corner, and the destination is not that corner, it can't be moved to the destination
+
+    
     total_dist = 0
     for snowball in state.snowballs:
-      total_dist += abs(snowball[0] - state.destination[0]) + abs(snowball[1] - state.destination[1])
+      x = snowball[0]
+      y = snowball[1]
+      if snowball not in state.destination:
+        # corner cases
+        top_left = (0, state.height - 1)
+        top_right = (state.width-1, state.height-1)
+        bottom_left = (0, 0)
+        bottom_right = (state.width, 0)
+        if(snowball == top_left or snowball == top_right or snowball == bottom_left or snowball == bottom_right):
+          return float("inf")
+
+        # wall cases
+        if((y == 0 or y == state.height -1) and (y != state.destination[1])):
+          return float("inf")
+        elif((x == 0 or x == state.width -1) and (x != state.destination[0])):
+          return float("inf")
+
+        total_dist += abs(snowball[0] - state.destination[0]) + abs(snowball[1] - state.destination[1])
+
+
 
     return total_dist
 
