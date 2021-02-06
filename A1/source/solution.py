@@ -50,7 +50,9 @@ def heur_alternate(state):
     # ie if the snowball is in the corner, and the destination is not that corner, it can't be moved to the destination
 
 
-    total_dist = 0
+    extra = 1
+    # initialize with manhattan dist of robot
+    total_dist = abs(state.robot[0] - state.destination[0]) + abs(state.robot[1] - state.destination[1])
     for snowball in state.snowballs:
       x = snowball[0]
       y = snowball[1]
@@ -70,9 +72,20 @@ def heur_alternate(state):
         elif((x == 0 or x == state.width -1) and (x != state.destination[0])):
           return float("inf")
 
-        total_dist += abs(snowball[0] - state.destination[0]) + abs(snowball[1] - state.destination[1])
+        # check for existing stacks
+        stack = state.snowballs[snowball]
+        man = abs(snowball[0] - state.destination[0]) + abs(snowball[1] - state.destination[1])
+
+        if(stack == 3 or stack == 4 or stack == 5):
+          # if two snowballs stacked, we need twice the moves to move them
+          man *= 2
+        elif(stack == 6):
+          man *= 3
+        total_dist += man
+
       else:
         return 0
+
 
 
     return total_dist
