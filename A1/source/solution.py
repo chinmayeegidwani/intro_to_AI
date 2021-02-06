@@ -72,6 +72,26 @@ def heur_alternate(state):
         elif((x == 0 or x == state.width -1) and (x != state.destination[0])):
           return float("inf")
 
+        # snowball deadlocked between obstacles
+        if(x+1, y) in state.obstacles and (x, y+1) in state.obstacles:
+          return float("inf")
+        elif(x-1, y) in state.obstacles and (x, y+1) in state.obstacles:
+          return float("inf")
+        elif(x-1, y) in state.obstacles and (x, y-1) in state.obstacles:
+          return float("inf")
+        elif(x+1, y) in state.obstacles and (x, y-1) in state.obstacles:
+          return float("inf")
+
+        # snowball deadlocked between wall and obstacles
+        # entering this if means goal is on wall and snow is on wall
+        if((y == 0 or y == state.height -1)):
+          if((x+1, y) in state.obstacles or (x-1, y) in state.obstacles):
+              return float("inf")
+        elif((x == 0 or x == state.width -1)):
+            if((x, y+1) in state.obstacles or (x, y-1) in state.obstacles):
+              return float("inf")
+
+
         # check for existing stacks
         stack = state.snowballs[snowball]
         man = abs(snowball[0] - state.destination[0]) + abs(snowball[1] - state.destination[1])
@@ -82,11 +102,8 @@ def heur_alternate(state):
         elif(stack == 6):
           man *= 3
         total_dist += man
-
       else:
         return 0
-
-
 
     return total_dist
 
