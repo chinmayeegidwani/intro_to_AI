@@ -72,26 +72,6 @@ def heur_alternate(state):
         elif((x == 0 or x == state.width -1) and (x != state.destination[0])):
           return float("inf")
 
-        # snowball deadlocked between obstacles
-        if(x+1, y) in state.obstacles and (x, y+1) in state.obstacles:
-          return float("inf")
-        elif(x-1, y) in state.obstacles and (x, y+1) in state.obstacles:
-          return float("inf")
-        elif(x-1, y) in state.obstacles and (x, y-1) in state.obstacles:
-          return float("inf")
-        elif(x+1, y) in state.obstacles and (x, y-1) in state.obstacles:
-          return float("inf")
-
-        # snowball deadlocked between wall and obstacles
-        # entering this if means goal is on wall and snow is on wall
-        if((y == 0 or y == state.height -1)):
-          if((x+1, y) in state.obstacles or (x-1, y) in state.obstacles):
-              return float("inf")
-        elif((x == 0 or x == state.width -1)):
-            if((x, y+1) in state.obstacles or (x, y-1) in state.obstacles):
-              return float("inf")
-
-
         # check for existing stacks
         stack = state.snowballs[snowball]
         man = abs(snowball[0] - state.destination[0]) + abs(snowball[1] - state.destination[1])
@@ -102,8 +82,11 @@ def heur_alternate(state):
         elif(stack == 6):
           man *= 3
         total_dist += man
+
       else:
         return 0
+
+
 
     return total_dist
 
@@ -136,6 +119,37 @@ def anytime_weighted_astar(initial_state, heur_fn, weight=1., timebound = 5):
   '''INPUT: a sokoban state that represents the start state and a timebound (number of seconds)'''
   '''OUTPUT: A goal state (if a goal is found), else False'''
   '''implementation of weighted astar algorithm'''
+
+  start_time = os.times()[0]
+  end_time = start_time + timebound
+
+  # initialize search engine
+  wrapped_fval_function = (lambda sN: fval_function(sN, weight))
+  s = SearchEngine('custom', 'full')
+  s.init_search(initial_state, snowman_goal_state, heur_fn, wrapped_fval_function)
+
+  # perform first search. No cost bound since there is no baseline yet
+  result = s.search(timebound)
+  cost_bound = (float("inf"), float("inf"), float("inf")) # g, h, g+h
+  return_val = False
+  #if(result):
+    #print("here")
+  while (start_time < end_time):
+    if result:
+      # pruning step
+      if(result.gval < cost_bound[0]):
+        cost_bound = (result.gval, result.gval, result.gval * 2)
+        return_val = result
+    else:
+      #print("here2")
+      return return_val
+    # perform search
+    result = s.search(timebound, cost_bound)
+
+  return return_val
+
+
+
   return False
 
 def anytime_gbfs(initial_state, heur_fn, timebound = 5):
