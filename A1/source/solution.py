@@ -82,11 +82,8 @@ def heur_alternate(state):
         elif(stack == 6):
           man *= 3
         total_dist += man
-
       else:
         return 0
-
-
 
     return total_dist
 
@@ -111,7 +108,7 @@ def fval_function(sN, weight):
     #The function must return a numeric f-value.
     #The value will determine your state's position on the Frontier list during a 'custom' search.
     #You must initialize your search engine object as a 'custom' search engine if you supply a custom fval function.
-    return 0
+    return sN.gval + (weight * sN.hval)
 
 def anytime_weighted_astar(initial_state, heur_fn, weight=1., timebound = 5):
 #IMPLEMENT
@@ -147,10 +144,6 @@ def anytime_weighted_astar(initial_state, heur_fn, weight=1., timebound = 5):
     result = s.search(timebound, cost_bound)
 
   return return_val
-
-
-
-  return False
 
 def anytime_gbfs(initial_state, heur_fn, timebound = 5):
 #IMPLEMENT

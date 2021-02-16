@@ -27,10 +27,29 @@ def compute_heuristic(board, color): #not implemented, optional
     #IMPLEMENT
     return 0 #change this!
 
+def other_player(player):
+    if player == 2:
+        return 1
+    else:
+        return 2
+
 ############ MINIMAX ###############################
 def minimax_min_node(board, color, limit, caching = 0):
     #IMPLEMENT (and replace the line below)
-    return ((0,0),0)
+    # you want to select move that minimizes utility
+    possible_moves = get_possible_moves(board, color)
+    min_util = float("inf")
+    optimal = possible_moves[0]
+
+    for move in possible_moves:
+        test_move = play_move(board, color, move[0], move[1])
+        util = minimax_max_node(test_move, other_player(color), limit, caching)
+        if util < min_util:
+            optimal = move
+            min_util = util
+
+
+    return (optimal, min_util)
 
 def minimax_max_node(board, color, limit, caching = 0): #returns highest possible utility
     #IMPLEMENT (and replace the line below)
