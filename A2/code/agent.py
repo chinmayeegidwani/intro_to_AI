@@ -43,7 +43,7 @@ def minimax_min_node(board, color, limit, caching = 0):
 
     for move in possible_moves:
         test_move = play_move(board, color, move[0], move[1])
-        util = minimax_max_node(test_move, other_player(color), limit, caching)
+        util = minimax_max_node(test_move, other_player(color), limit, caching)[1]
         if util < min_util:
             optimal = move
             min_util = util
@@ -53,7 +53,19 @@ def minimax_min_node(board, color, limit, caching = 0):
 
 def minimax_max_node(board, color, limit, caching = 0): #returns highest possible utility
     #IMPLEMENT (and replace the line below)
-    return ((0,0),0)
+    possible_moves = get_possible_moves(board, color)
+    max_util = float("inf")
+    optimal = possible_moves[0]
+
+    for move in possible_moves:
+        test_move = play_move(board, color, move[0], move[1])
+        util = minimax_min_node(test_move, other_player(color), limit, caching)[1]
+        if util > max_util:
+            optimal = move
+            min_util = util
+
+
+    return (optimal, max_util)
 
 def select_move_minimax(board, color, limit, caching = 0):
     """
