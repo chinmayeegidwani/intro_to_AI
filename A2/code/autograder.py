@@ -30,7 +30,7 @@ test_minimax_max_node_2 = False
 test_caching_big = True
 test_ordering = False
 test_select_move_minimax = False
-test_select_move_alphabeta = False
+test_select_move_alphabeta = True
 test_select_move_equal = False
 
 if test_compute_utility:

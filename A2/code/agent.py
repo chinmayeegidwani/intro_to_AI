@@ -118,8 +118,8 @@ def select_move_minimax(board, color, limit, caching = 0):
 ############ ALPHA-BETA PRUNING #####################
 def alphabeta_min_node(board, color, alpha, beta, limit, caching = 0, ordering = 0):
     if caching:
-        if (board, color) in alpha_dic:
-            return alpha_dic[(board, color)]
+        if (board, color) in beta_dic:
+            return beta_dic[(board, color)]
 
     # you want to select move that minimizes utility
     possible_moves = get_possible_moves(board, color)
@@ -128,7 +128,7 @@ def alphabeta_min_node(board, color, alpha, beta, limit, caching = 0, ordering =
     if len(possible_moves) == 0 or limit == 0:  # game ends with no possible moves left
         res = (None, -1 * compute_utility(board, color))  # if we reach end of depth limit, use func to compute non-terminal utility value
         if caching:
-            alpha_dic[(board, color)] = res
+            beta_dic[(board, color)] = res
         return res
     min_util = float("inf")
     optimal = possible_moves[0]
@@ -144,22 +144,22 @@ def alphabeta_min_node(board, color, alpha, beta, limit, caching = 0, ordering =
             break
 
     if caching:
-        alpha_dic[(board, color)] = (optimal, min_util)
+        beta_dic[(board, color)] = (optimal, min_util)
 
 
     return (optimal, min_util)
 
 def alphabeta_max_node(board, color, alpha, beta, limit, caching = 0, ordering = 0):
     if caching:
-        if (board, color) in beta_dic:
-            return beta_dic[(board, color)]
+        if (board, color) in alpha_dic:
+            return alpha_dic[(board, color)]
 
     possible_moves = get_possible_moves(board, color)
 
     if len(possible_moves) == 0 or limit == 0:  # game ends with no possible moves left
         res = (None, 1 * compute_utility(board, color))  # if we reach end of depth limit, use func to compute non-terminal utility value
         if caching:
-            beta_dic[(board, color)] = res
+            alpha_dic[(board, color)] = res
         return res
     max_util = float("-inf")
     optimal = possible_moves[0]
@@ -176,7 +176,7 @@ def alphabeta_max_node(board, color, alpha, beta, limit, caching = 0, ordering =
             break
 
     if caching:
-        beta_dic[(board, color)] = (optimal, max_util)
+        alpha_dic[(board, color)] = (optimal, max_util)
 
     return (optimal, max_util)
 
