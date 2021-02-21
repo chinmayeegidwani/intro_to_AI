@@ -6,6 +6,11 @@ import random
 import sys
 import time
 
+min_dic = dict()
+max_dic = dict()
+alpha_dic = dict()
+beta_dic = dict()
+
 # You can use the functions in othello_shared to write your AI
 from othello_shared import find_lines, get_possible_moves, get_score, play_move
 
@@ -35,12 +40,20 @@ def other_player(player):
 
 ############ MINIMAX ###############################
 def minimax_min_node(board, color, limit, caching = 0):
+    # if it's already been computed and in the dict, return that
+    if caching:
+        if (board, color) in min_dic:
+            return min_dic[(board, color)]
+
     # you want to select move that minimizes utility
     possible_moves = get_possible_moves(board, color)
 
     # -1 or 1? might be -1 since good for min is bad for max, which is our player
     if len(possible_moves) == 0 or limit == 0:  # game ends with no possible moves left
-        return (None, -1 * compute_utility(board, color))  # if we reach end of depth limit, use func to compute non-terminal utility value
+        res = (None, -1 * compute_utility(board, color))  # if we reach end of depth limit, use func to compute non-terminal utility value
+        if caching:
+            min_dic[(board, color)] = res
+        return res
 
     min_util = float("inf")
     optimal = possible_moves[0]
@@ -52,14 +65,24 @@ def minimax_min_node(board, color, limit, caching = 0):
             optimal = move
             min_util = util
 
+    if caching:
+        min_dic[(board, color)] = (optimal, min_util)
+
     return (optimal, min_util)
 
 def minimax_max_node(board, color, limit, caching = 0): #returns highest possible utility
+    # if it's already been computed and in the dict, return that
+    if caching:
+        if (board, color) in max_dic:
+            return max_dic[(board, color)]
+    
     possible_moves = get_possible_moves(board, color)
 
     if len(possible_moves) == 0 or limit == 0:  # game ends with no possible moves left
-        return (None, compute_utility(board, color))  # if we reach end of depth limit, use func to compute non-terminal utility value
-
+        res = (None, 1 * compute_utility(board, color))  # if we reach end of depth limit, use func to compute non-terminal utility value
+        if caching:
+            max_dic[(board, color)] = res
+        return res
     max_util = float("-inf")
     optimal = possible_moves[0]
 
@@ -69,6 +92,10 @@ def minimax_max_node(board, color, limit, caching = 0): #returns highest possibl
         if util > max_util:
             optimal = move
             max_util = util
+
+    if caching:
+        max_dic[(board, color)] = (optimal, max_util)
+
 
     return (optimal, max_util)
 
@@ -90,55 +117,68 @@ def select_move_minimax(board, color, limit, caching = 0):
 
 ############ ALPHA-BETA PRUNING #####################
 def alphabeta_min_node(board, color, alpha, beta, limit, caching = 0, ordering = 0):
-    #IMPLEMENT (and replace the line below)
+    if caching:
+        if (board, color) in alpha_dic:
+            return alpha_dic[(board, color)]
+
+    # you want to select move that minimizes utility
     possible_moves = get_possible_moves(board, color)
 
-    if limit == 0 or len(possible_moves) == 0: # game ends with no possible moves left
-        return (None, -1 * compute_utility(board, color)) # if we reach end of depth limit, use func to compute non-terminal utility value
-
-
-    max_util = float("-inf")
+    # -1 or 1? might be -1 since good for min is bad for max, which is our player
+    if len(possible_moves) == 0 or limit == 0:  # game ends with no possible moves left
+        res = (None, -1 * compute_utility(board, color))  # if we reach end of depth limit, use func to compute non-terminal utility value
+        if caching:
+            alpha_dic[(board, color)] = res
+        return res
+    min_util = float("inf")
     optimal = possible_moves[0]
 
-
-
-    for move in possible_moves: # go through all moves, find optimal
+    for move in possible_moves:
         test_move = play_move(board, color, move[0], move[1])
         util = alphabeta_max_node(test_move, other_player(color), alpha, beta, limit-1, caching, ordering)[1]
-        if util > max_util:
+        if util < min_util:
             optimal = move
             min_util = util
-        beta = min(beta, max_util) # min player updates beta val
-        if beta <= alpha: # prune if less than the best so far
+        beta = min(beta, min_util)
+        if beta <= alpha:
             break
 
+    if caching:
+        alpha_dic[(board, color)] = (optimal, min_util)
 
-    return (optimal, max_util) #change this!
+
+    return (optimal, min_util)
 
 def alphabeta_max_node(board, color, alpha, beta, limit, caching = 0, ordering = 0):
-    #IMPLEMENT (and replace the line below)
+    if caching:
+        if (board, color) in beta_dic:
+            return beta_dic[(board, color)]
+
     possible_moves = get_possible_moves(board, color)
 
-    if limit == 0 or len(possible_moves) == 0: # game ends with no possible moves left
-        return (None, compute_utility(board, color)) # if we reach end of depth limit, use func to compute non-terminal utility value
-
+    if len(possible_moves) == 0 or limit == 0:  # game ends with no possible moves left
+        res = (None, 1 * compute_utility(board, color))  # if we reach end of depth limit, use func to compute non-terminal utility value
+        if caching:
+            beta_dic[(board, color)] = res
+        return res
     max_util = float("-inf")
     optimal = possible_moves[0]
 
-
-
-    for move in possible_moves: # go through all moves, find optimal
+    for move in possible_moves:
         test_move = play_move(board, color, move[0], move[1])
         util = alphabeta_min_node(test_move, other_player(color), alpha, beta, limit-1, caching, ordering)[1]
         if util > max_util:
             optimal = move
-            min_util = util
-        alpha = max(alpha, max_util) # max player updates alpha val
-        if beta <= alpha: # prune if less than the best so far
+            max_util = util
+
+        alpha = max(alpha, max_util)
+        if beta <= alpha:
             break
 
+    if caching:
+        beta_dic[(board, color)] = (optimal, max_util)
 
-    return (optimal, max_util) #change this!
+    return (optimal, max_util)
 
 def select_move_alphabeta(board, color, limit, caching = 0, ordering = 0):
     """
@@ -156,7 +196,7 @@ def select_move_alphabeta(board, color, limit, caching = 0, ordering = 0):
     If ordering is OFF (i.e. 0), do NOT use node ordering to expedite pruning and reduce the number of state evaluations. 
     """
     #IMPLEMENT (and replace the line below)
-    return alphabeta_max_node(board, color, float("-inf"), float("-inf"), limit, caching, ordering)[0] #change this!
+    return alphabeta_max_node(board, color, float("-inf"), float("inf"), limit, caching, ordering)[0] #change this!
 
 ####################################################
 def run_ai():
