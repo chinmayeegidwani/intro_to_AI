@@ -38,28 +38,37 @@ def minimax_min_node(board, color, limit, caching = 0):
     #IMPLEMENT (and replace the line below)
     # you want to select move that minimizes utility
     possible_moves = get_possible_moves(board, color)
+
+
+    # -1 or 1? might be -1 since good for min is bad for max, which is our player
+    if limit == 0 or len(possible_moves) == 0: # game ends with no possible moves left
+        return (None, -1 * compute_utility(board, color)) # if we reach end of depth limit, use func to compute non-terminal utility value
+
     min_util = float("inf")
     optimal = possible_moves[0]
 
     for move in possible_moves:
         test_move = play_move(board, color, move[0], move[1])
-        util = minimax_max_node(test_move, other_player(color), limit, caching)[1]
+        util = minimax_max_node(test_move, other_player(color), limit-1, caching)[1]
         if util < min_util:
             optimal = move
             min_util = util
-
 
     return (optimal, min_util)
 
 def minimax_max_node(board, color, limit, caching = 0): #returns highest possible utility
     #IMPLEMENT (and replace the line below)
     possible_moves = get_possible_moves(board, color)
+
+    if limit == 0 or len(possible_moves) == 0: # game ends with no possible moves left
+        return (None, compute_utility(board, color)) # if we reach end of depth limit, use func to compute non-terminal utility value
+
     max_util = float("inf")
     optimal = possible_moves[0]
 
-    for move in possible_moves:
+    for move in possible_moves: # go through all moves, find optimal
         test_move = play_move(board, color, move[0], move[1])
-        util = minimax_min_node(test_move, other_player(color), limit, caching)[1]
+        util = minimax_min_node(test_move, other_player(color), limit-1, caching)[1]
         if util > max_util:
             optimal = move
             min_util = util
@@ -81,16 +90,59 @@ def select_move_minimax(board, color, limit, caching = 0):
     If caching is OFF (i.e. 0), do NOT use state caching to reduce the number of state evaluations.    
     """
     #IMPLEMENT (and replace the line below)
-    return (0,0) #change this!
+    return minimax_max_node(board, color, limit, caching)[0] #change this!
 
 ############ ALPHA-BETA PRUNING #####################
 def alphabeta_min_node(board, color, alpha, beta, limit, caching = 0, ordering = 0):
     #IMPLEMENT (and replace the line below)
-    return ((0,0),0) #change this!
+    possible_moves = get_possible_moves(board, color)
+
+    if limit == 0 or len(possible_moves) == 0: # game ends with no possible moves left
+        return (None, -1 * compute_utility(board, color)) # if we reach end of depth limit, use func to compute non-terminal utility value
+
+
+    max_util = float("-inf")
+    optimal = possible_moves[0]
+
+
+
+    for move in possible_moves: # go through all moves, find optimal
+        test_move = play_move(board, color, move[0], move[1])
+        util = alphabeta_max_node(test_move, other_player(color), alpha, beta, limit-1, caching, ordering)[1]
+        if util > max_util:
+            optimal = move
+            min_util = util
+        beta = min(beta, max_util) # min player updates beta val
+        if beta <= alpha: # prune if less than the best so far
+            break
+
+
+    return (optimal, max_util) #change this!
 
 def alphabeta_max_node(board, color, alpha, beta, limit, caching = 0, ordering = 0):
     #IMPLEMENT (and replace the line below)
-    return ((0,0),0) #change this!
+    possible_moves = get_possible_moves(board, color)
+
+    if limit == 0 or len(possible_moves) == 0: # game ends with no possible moves left
+        return (None, compute_utility(board, color)) # if we reach end of depth limit, use func to compute non-terminal utility value
+
+    max_util = float("-inf")
+    optimal = possible_moves[0]
+
+
+
+    for move in possible_moves: # go through all moves, find optimal
+        test_move = play_move(board, color, move[0], move[1])
+        util = alphabeta_min_node(test_move, other_player(color), alpha, beta, limit-1, caching, ordering)[1]
+        if util > max_util:
+            optimal = move
+            min_util = util
+        alpha = max(alpha, max_util) # max player updates alpha val
+        if beta <= alpha: # prune if less than the best so far
+            break
+
+
+    return (optimal, max_util) #change this!
 
 def select_move_alphabeta(board, color, limit, caching = 0, ordering = 0):
     """
@@ -108,7 +160,7 @@ def select_move_alphabeta(board, color, limit, caching = 0, ordering = 0):
     If ordering is OFF (i.e. 0), do NOT use node ordering to expedite pruning and reduce the number of state evaluations. 
     """
     #IMPLEMENT (and replace the line below)
-    return (0,0) #change this!
+    return alphabeta_max_node(board, color, float("-inf"), float("-inf"), limit, caching, ordering)[0] #change this!
 
 ####################################################
 def run_ai():
