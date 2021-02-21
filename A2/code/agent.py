@@ -35,14 +35,13 @@ def other_player(player):
 
 ############ MINIMAX ###############################
 def minimax_min_node(board, color, limit, caching = 0):
-    #IMPLEMENT (and replace the line below)
+    #IMPLEMENT
     # you want to select move that minimizes utility
     possible_moves = get_possible_moves(board, color)
 
-
     # -1 or 1? might be -1 since good for min is bad for max, which is our player
-    if limit == 0 or len(possible_moves) == 0: # game ends with no possible moves left
-        return (None, -1 * compute_utility(board, color)) # if we reach end of depth limit, use func to compute non-terminal utility value
+    if possible_moves == [] or limit == 0:  # game ends with no possible moves left
+        return (None, (-1) * compute_utility(board, color))  # if we reach end of depth limit, use func to compute non-terminal utility value
 
     min_util = float("inf")
     optimal = possible_moves[0]
@@ -57,22 +56,20 @@ def minimax_min_node(board, color, limit, caching = 0):
     return (optimal, min_util)
 
 def minimax_max_node(board, color, limit, caching = 0): #returns highest possible utility
-    #IMPLEMENT (and replace the line below)
     possible_moves = get_possible_moves(board, color)
 
-    if limit == 0 or len(possible_moves) == 0: # game ends with no possible moves left
-        return (None, compute_utility(board, color)) # if we reach end of depth limit, use func to compute non-terminal utility value
+    if possible_moves == [] or limit == 0:  # game ends with no possible moves left
+        return (None, (-1) * compute_utility(board, color))  # if we reach end of depth limit, use func to compute non-terminal utility value
 
-    max_util = float("inf")
+    max_util = float("-inf")
     optimal = possible_moves[0]
 
-    for move in possible_moves: # go through all moves, find optimal
+    for move in possible_moves:
         test_move = play_move(board, color, move[0], move[1])
-        util = minimax_min_node(test_move, other_player(color), limit-1, caching)[1]
+        util = minimax_min_node(test_move,  other_player(color), limit-1, caching)[1]
         if util > max_util:
             optimal = move
-            min_util = util
-
+            max_util = util
 
     return (optimal, max_util)
 
