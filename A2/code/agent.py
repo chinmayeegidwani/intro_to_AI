@@ -132,10 +132,20 @@ def alphabeta_min_node(board, color, alpha, beta, limit, caching = 0, ordering =
         return res
     min_util = float("inf")
     optimal = possible_moves[0]
+    next_states = []
 
     for move in possible_moves:
+        # play next move and populate states
+        # if min plays a move
         test_move = play_move(board, other_player(color), move[0], move[1])
-        util = alphabeta_max_node(test_move, color, alpha, beta, limit-1, caching, ordering)[1]
+        next_states.append(test_move)
+
+    if ordering:
+        # order next states in decreasing utility function value
+        next_states.sort(key = lambda board: compute_utility(board, other_player(color)), reverse = True)
+
+    for state in next_states:
+        util = alphabeta_max_node(state, color, alpha, beta, limit-1, caching, ordering)[1]
         if util < min_util:
             optimal = move
             min_util = util
@@ -164,9 +174,19 @@ def alphabeta_max_node(board, color, alpha, beta, limit, caching = 0, ordering =
     max_util = float("-inf")
     optimal = possible_moves[0]
 
+    next_states = []
+
     for move in possible_moves:
+        # play next move and populate states
         test_move = play_move(board, color, move[0], move[1])
-        util = alphabeta_min_node(test_move, color, alpha, beta, limit-1, caching, ordering)[1]
+        next_states.append(test_move)
+
+    if ordering:
+        # order next states in decreasing utility function value
+        next_states.sort(key = lambda board: compute_utility(board, color), reverse = True)
+
+    for state in next_states:
+        util = alphabeta_min_node(state, color, alpha, beta, limit-1, caching, ordering)[1]
         if util > max_util:
             optimal = move
             max_util = util
