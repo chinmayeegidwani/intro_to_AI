@@ -128,7 +128,7 @@ def alphabeta_min_node(board, color, alpha, beta, limit, caching = 0, ordering =
     if len(possible_moves) == 0 or limit == 0:  # game ends with no possible moves left
         res = (None, -1 * compute_utility(board, other_player(color)))  # if we reach end of depth limit, use func to compute non-terminal utility value
         if caching:
-            beta_dic[(board, other_player(color))] = res
+            beta_dic[(board, color)] = res
         return res
     min_util = float("inf")
     optimal = possible_moves[0]
@@ -142,14 +142,15 @@ def alphabeta_min_node(board, color, alpha, beta, limit, caching = 0, ordering =
 
     if ordering:
         # order next states in decreasing utility function value
-        next_states.sort(key = lambda board: compute_utility(board, other_player(color)), reverse = True)
-
+        next_states.sort(key = lambda board: compute_utility(board, color), reverse = True)
+    i = 0
     for state in next_states:
         util = alphabeta_max_node(state, color, alpha, beta, limit-1, caching, ordering)[1]
         if util < min_util:
-            optimal = move
+            optimal = possible_moves[i]
             min_util = util
         beta = min(beta, min_util)
+        i += 1
         if beta <= alpha:
             break
 
@@ -184,14 +185,15 @@ def alphabeta_max_node(board, color, alpha, beta, limit, caching = 0, ordering =
     if ordering:
         # order next states in decreasing utility function value
         next_states.sort(key = lambda board: compute_utility(board, color), reverse = True)
-
+    i = 0
     for state in next_states:
         util = alphabeta_min_node(state, color, alpha, beta, limit-1, caching, ordering)[1]
         if util > max_util:
-            optimal = move
+            optimal = possible_moves[i]
             max_util = util
 
         alpha = max(alpha, max_util)
+        i += 1
         if beta <= alpha:
             break
 
