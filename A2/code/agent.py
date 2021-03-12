@@ -30,7 +30,24 @@ def compute_utility(board, color):
 # Better heuristic value of board
 def compute_heuristic(board, color): #not implemented, optional
     #IMPLEMENT
-    return 0 #change this!
+    score = 0
+    dark, light = get_score(board)
+    if(color == 1): #dark
+        score = dark - light
+    if(color == 2): #light
+        score = light - dark
+
+    if(board[0][0] == color):
+        score += 50
+    if(board[len(board) - 1][0] == color):
+        score += 50
+    if(board[0][len(board) - 1] == color):
+        score += 50
+    if(board[len(board) - 1][len(board) - 1] == color):
+        score += 50
+
+    return score
+
 
 def other_player(player):
     if player == 2:
