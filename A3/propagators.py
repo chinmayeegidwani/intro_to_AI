@@ -94,20 +94,30 @@ def prop_FC(csp, newVar=None):
        track of all pruned variable,value pairs and return '''
     pruned = []
     if not newVar:
-        return True, []
-    for c in csp.get_cons_with_var(newVar):
-        if c.get_n_unasgn() == 1: # num unassigned variables in scope
-            # if there is one unassigned variable left
-            var = c.get_unasgn_vars()[0] # returns variable, value
-            for val in var.cur_domain():
-                # loop over possible values, see if constraints hold
-                if not c.has_support(var, val):
-                    # if (var, val) has no supporting tuples that satisfy
-                    # constraint, prune
-                    var.prune_value(val)
-                    pruned.append((var, val))
+        for c in csp.get_all_cons():
+            s = c.get_scope()
+            if c.get_n_unasgn == 1:
+                var = c.get_unasgn_vars()
+                for val in var.cur_domain():
+                    if not c.check(val):
+                        var.prune_value(val)
+                        pruned.append((var, val))
                 if var.cur_domain_size() == 0:
-                    return False, pruned
+                    return False, pruned # domain wipeout
+    else:
+        for c in csp.get_cons_with_var(newVar):
+            if c.get_n_unasgn() == 1: # num unassigned variables in scope
+                # if there is one unassigned variable left
+                var = c.get_unasgn_vars()[0] # returns variable, value
+                for val in var.cur_domain():
+                    # loop over possible values, see if constraints hold
+                    if not c.has_support(var, val):
+                        # if (var, val) has no supporting tuples that satisfy
+                        # constraint, prune
+                        var.prune_value(val)
+                        pruned.append((var, val))
+                    if var.cur_domain_size() == 0:
+                        return False, pruned
             
             
             
