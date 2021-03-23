@@ -64,7 +64,34 @@ def tenner_csp_model_1(initial_tenner_board):
        model_1 also constains n-nary constraints of sum constraints for each 
        column.
     '''
-    
+    board, last_row = initial_tenner_board
+    var_array = [[] for i in range(len(board))]
+    var_domain = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    nrows = len(board)
+    #print("array: \n")
+    #print(var_array)
+    # init variables
+    for i in range(nrows):
+      for j in range(10):
+        if board[i][j] == -1: # if empty, have all of domain in variable
+          var_array[i].append(Variable("{},{}".format(i, j), var_domain))
+        else: # if given, save to variable array
+          var_array[i].append(Variable('V{},{}'.format(i,j), [board[i][j]]))
+
+    # construct model
+    model_vars = []
+    for row in var_array:
+      for v in row:
+        model_vars.append(v)
+
+    model1 = CSP("Model1", model_vars)
+
+    #for i in range(nrows):
+     
+     # for j in range(10):
+        
+
+
 #IMPLEMENT
     return None, None #CHANGE THIS
 ##############################

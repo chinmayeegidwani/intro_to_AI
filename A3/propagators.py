@@ -1,6 +1,6 @@
 #Look for #IMPLEMENT tags in this file. These tags indicate what has
 #to be implemented to complete problem solution.  
-
+import queue
 '''This file will contain different constraint propagators to be used within 
    bt_search.
 
@@ -95,15 +95,18 @@ def prop_FC(csp, newVar=None):
     pruned = []
     if not newVar:
         for c in csp.get_all_cons():
-            s = c.get_scope()
-            if c.get_n_unasgn == 1:
-                var = c.get_unasgn_vars()
+            if c.get_n_unasgn() == 1: # num unassigned variables in scope
+                # if there is one unassigned variable left
+                var = c.get_unasgn_vars()[0] # returns variable, value
                 for val in var.cur_domain():
-                    if not c.check(val):
+                    # loop over possible values, see if constraints hold
+                    if not c.has_support(var, val):
+                        # if (var, val) has no supporting tuples that satisfy
+                        # constraint, prune
                         var.prune_value(val)
                         pruned.append((var, val))
-                if var.cur_domain_size() == 0:
-                    return False, pruned # domain wipeout
+                    if var.cur_domain_size() == 0:
+                        return False, pruned
     else:
         for c in csp.get_cons_with_var(newVar):
             if c.get_n_unasgn() == 1: # num unassigned variables in scope
@@ -130,9 +133,58 @@ def prop_GAC(csp, newVar=None):
     '''Do GAC propagation. If newVar is None we do initial GAC enforce 
        processing all constraints. Otherwise we do GAC enforce with
        constraints containing newVar on GAC Queue'''
+    pruned = []
+    scope = []
+
+    if not newVar:
+        cons = csp.get_all_cons()
+    else:
+        cons = csp.get_cons_with_var(newVar)
+    Q = queue.Queue()
+
+    for con in cons:
+        Q.put(con)
+    # Q has appropriate constraints for parsing
+    while not Q.empty():
+        con = Q.get() # pop from queue
+        for var in con.get_scope():
+            propagate_GAC = False
+             # iterate through vars in this constraint
+             # GAC enforce
+            if var.cur_domain_size() == 0:
+                return False, pruned # domain wipeout
+
+            for val in var.cur_domain():
+                if not con.has_support(var, val):
+                    var.prune_value(val)
+                    pruned.append((var, val))
+                    propagate_GAC = True
+
+            if propagate_GAC:
+                # If there was pruning, we need to re-check all the other constraints
+                # that contain the variable we pruned
+                # add it back to the queue
+                for c in csp.get_cons_with_var(var):
+                    if c != con:
+                        Q.put(c)
+
+    return True, pruned
+
+
     #IMPLEMENT
 
 def ord_mrv(csp):
     ''' return variable according to the Minimum Remaining Values heuristic '''
+    min_domain = float("inf")
+    min_var = None
+
+    vars = csp.get_unasgn_vars()
+    for v in vars:
+        if v.cur_domain_size() < min_domain:
+            min_domain = v.cur_domain_size()
+            min_var = v
+    
+    return min_var
+    
     #IMPLEMENT
 	
