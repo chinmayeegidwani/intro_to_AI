@@ -88,6 +88,21 @@ def tenner_csp_model_1(initial_tenner_board):
 
     for row in range(nrows):
       for col in range(10):
+        for x in itertools.combinations(var_array[row], 2):
+          c = Constraint('C:V{}xV{}'.format(x[0].name, x[1].name), x)
+
+          domains = []
+          for var in x:
+            domains.append(var.domain())
+
+          s = []
+          for i in itertools.product(*domains):
+            if i[0] != i[1]:
+              s.append(i)
+          c.add_satisfying_tuples(s)
+          model1.add_constraint(c)
+
+
         # special cases
         if row == 0:
           if col == 0:
@@ -109,21 +124,22 @@ def tenner_csp_model_1(initial_tenner_board):
           con = [var_array[row+1][col], var_array[row+1][col+1], var_array[row-1][col+1], var_array[row-1][col]]
         else:
           con = [var_array[row+1][col], var_array[row+1][col-1], var_array[row+1][col+1], var_array[row-1][col], var_array[row-1][col-1], var_array[row-1][col+1]]
-
+        # construct the constraints, add to model for each variable pair
         for v in con:
-          vars = [var_array[row][col], v]
+          x = [var_array[row][col], v]
           # vars, model1
-          c2 = Constraint("C{}{}{}".format(row, col, v), vars)
-          doms = []
-          for v in vars:
-            doms.append(v.domain())
-          
+          c = Constraint('C:V{}xV{}'.format(x[0].name, x[1].name), x)
+
+          domains = []
+          for var in x:
+            domains.append(var.domain())
+
           s = []
-          for i in itertools.product(*doms):
+          for i in itertools.product(*domains):
             if i[0] != i[1]:
               s.append(i)
-          c2.add_satisfying_tuples(s)
-          model1.add_constraint(c2)
+          c.add_satisfying_tuples(s)
+          model1.add_constraint(c)
 
     for i in range(10):
       domains = [var_array[x][i].cur_domain() for x in range(nrows)]
