@@ -178,7 +178,7 @@ def ord_mrv(csp):
     min_domain = float("inf")
     min_var = None
 
-    vars = csp.get_unasgn_vars()
+    vars = csp.get_all_unasgn_vars()
     for v in vars:
         if v.cur_domain_size() < min_domain:
             min_domain = v.cur_domain_size()

@@ -112,7 +112,17 @@ def tenner_csp_model_1(initial_tenner_board):
 
         for v in con:
           vars = [var_array[row][col], v]
+          # vars, model1
           c2 = Constraint("C{}{}{}".format(row, col, v), vars)
+          doms = []
+          for v in vars:
+            doms.append(v.domain())
+          
+          s = []
+          for i in itertools.product(*doms):
+            if i[0] != i[1]:
+              s.append(i)
+          c2.add_satisfying_tuples(s)
           model1.add_constraint(c2)
 
     for i in range(10):
