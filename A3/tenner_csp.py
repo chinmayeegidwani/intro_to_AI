@@ -86,14 +86,48 @@ def tenner_csp_model_1(initial_tenner_board):
 
     model1 = CSP("Model1", model_vars)
 
-    #for i in range(nrows):
-     
-     # for j in range(10):
-        
+    for row in range(nrows):
+      for col in range(10):
+        # special cases
+        if row == 0:
+          if col == 0:
+            con = [var_array[row+1][col+1], var_array[row+1][col]]
+          elif col == 9:
+            con = [var_array[row+1][col-1], var_array[row+1][col]]
+          else:
+            con = [var_array[row+1][col-1], var_array[row+1][col], var_array[row+1][col+1]]
+        elif row == nrows-1:
+          if col == 0:
+            con = [var_array[row-1][col], var_array[row-1][col+1]]
+          elif col == 9:
+            con = [var_array[row-1][col], var_array[row-1][col-1]]
+          else:
+            con = [var_array[row-1][col-1], var_array[row-1][col], var_array[row-1][col+1]]
+        elif col == 9:
+          con = [var_array[row+1][col], var_array[row+1][col-1], var_array[row-1][col-1], var_array[row-1][col]]
+        elif col == 0:
+          con = [var_array[row+1][col], var_array[row+1][col+1], var_array[row-1][col+1], var_array[row-1][col]]
+        else:
+          con = [var_array[row+1][col], var_array[row+1][col-1], var_array[row+1][col+1], var_array[row-1][col], var_array[row-1][col-1], var_array[row-1][col+1]]
+
+        for v in con:
+          vars = [var_array[row][col], v]
+          c2 = Constraint("C{}{}{}".format(row, col, v), vars)
+          model1.add_constraint(c2)
+
+    for i in range(10):
+      domains = [var_array[x][i].cur_domain() for x in range(nrows)]
+      #print("domains: \n")
+      #print(domains)
+      c = Constraint("sum{}".format(i), [var_array[x][i] for x in range(nrows)])
+      for j in itertools.product(*domains):
+        if sum(j) == last_row[i]:
+          c.add_satisfying_tuples([j])
+      model1.add_constraint(c)
 
 
 #IMPLEMENT
-    return None, None #CHANGE THIS
+    return model1, var_array #CHANGE THIS
 ##############################
 
 def tenner_csp_model_2(initial_tenner_board):
