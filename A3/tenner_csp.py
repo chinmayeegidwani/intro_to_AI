@@ -89,6 +89,7 @@ def tenner_csp_model_1(initial_tenner_board):
     for row in range(nrows):
       for col in range(10):
         for x in itertools.combinations(var_array[row], 2):
+          # row constraints, all combinations of two variables in a row are different
           c = Constraint('C:V{}xV{}'.format(x[0].name, x[1].name), x)
 
           domains = []
@@ -103,7 +104,7 @@ def tenner_csp_model_1(initial_tenner_board):
           model1.add_constraint(c)
 
 
-        # special cases
+        # special cases + contiguous constraints
         if row == 0:
           if col == 0:
             con = [var_array[row+1][col+1], var_array[row+1][col]]
@@ -155,6 +156,14 @@ def tenner_csp_model_1(initial_tenner_board):
 #IMPLEMENT
     return model1, var_array #CHANGE THIS
 ##############################
+def all_pairs(V1,V2):
+    out = [] # will be array of tuples
+    for d1 in V1.domain():
+        for d2 in V2.domain():
+            if (d1 != d2):
+                out.append((d1,d2))
+    return out
+
 
 def tenner_csp_model_2(initial_tenner_board):
     '''Return a CSP object representing a Tenner Grid CSP problem along 
@@ -196,5 +205,96 @@ def tenner_csp_model_2(initial_tenner_board):
        all-different constraints between the relevant variables.
     '''
 
+    board, last_row = initial_tenner_board
+    var_array = [[] for i in range(len(board))]
+    var_domain = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    nrows = len(board)
+    #print("array: \n")
+    #print(var_array)
+    # init variables
+    for i in range(nrows):
+      for j in range(10):
+        if board[i][j] == -1: # if empty, have all of domain in variable
+          var_array[i].append(Variable("{},{}".format(i, j), var_domain))
+        else: # if given, save to variable array
+          var_array[i].append(Variable('V{},{}'.format(i,j), [board[i][j]]))
+
+    # construct model
+    model_vars = []
+    for row in var_array:
+      for v in row:
+        model_vars.append(v)
+
+    model1 = CSP("Model1", model_vars)
+
+    # row constraints
+    for i in range(nrows):
+      for j in range(10):
+        for k in range(j+1, 10):
+          c = Constraint("rows",[var_array[i][j],var_array[i][k]])
+
+          all_tuples = []
+          for v1 in var_array[i][j].domain():
+            for v2 in var_array[i][k].domain():
+              if (v1 != v2):
+                all_tuples.append((v1, v2))
+          c.add_satisfying_tuples(all_tuples)
+          model1.add_constraint(c)
+
+
+    # everything else is same as model1
+    for row in range(nrows):
+      for col in range(10):
+        # special cases + contiguous constraints
+        # same as model1
+        if row == 0:
+          if col == 0:
+            con = [var_array[row+1][col+1], var_array[row+1][col]]
+          elif col == 9:
+            con = [var_array[row+1][col-1], var_array[row+1][col]]
+          else:
+            con = [var_array[row+1][col-1], var_array[row+1][col], var_array[row+1][col+1]]
+        elif row == nrows-1:
+          if col == 0:
+            con = [var_array[row-1][col], var_array[row-1][col+1]]
+          elif col == 9:
+            con = [var_array[row-1][col], var_array[row-1][col-1]]
+          else:
+            con = [var_array[row-1][col-1], var_array[row-1][col], var_array[row-1][col+1]]
+        elif col == 9:
+          con = [var_array[row+1][col], var_array[row+1][col-1], var_array[row-1][col-1], var_array[row-1][col]]
+        elif col == 0:
+          con = [var_array[row+1][col], var_array[row+1][col+1], var_array[row-1][col+1], var_array[row-1][col]]
+        else:
+          con = [var_array[row+1][col], var_array[row+1][col-1], var_array[row+1][col+1], var_array[row-1][col], var_array[row-1][col-1], var_array[row-1][col+1]]
+        # construct the constraints, add to model for each variable pair
+        for v in con:
+          x = [var_array[row][col], v]
+          # vars, model1
+          c = Constraint('C:V{}xV{}'.format(x[0].name, x[1].name), x)
+
+          domains = []
+          for var in x:
+            domains.append(var.domain())
+
+          s = []
+          for i in itertools.product(*domains):
+            if i[0] != i[1]:
+              s.append(i)
+          c.add_satisfying_tuples(s)
+          model1.add_constraint(c)
+    
+    # same as model1
+    for i in range(10):
+      domains = [var_array[x][i].cur_domain() for x in range(nrows)]
+      #print("domains: \n")
+      #print(domains)
+      c = Constraint("sum{}".format(i), [var_array[x][i] for x in range(nrows)])
+      for j in itertools.product(*domains):
+        if sum(j) == last_row[i]:
+          c.add_satisfying_tuples([j])
+      model1.add_constraint(c)
+
+
 #IMPLEMENT
-    return None, None #CHANGE THIS
+    return model1, var_array #CHANGE THIS
