@@ -63,7 +63,7 @@ def tag(training_list, test_file, output_file):
     # Doesn't do much else beyond that yet.
     #print("Tagging the file.")
     train_words = []
-    train_tags = []f
+    train_tags = []
     test_words = []
     # separate words and tags into lists
     for file in training_list:
