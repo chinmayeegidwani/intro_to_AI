@@ -4,6 +4,39 @@
 import os
 import sys
 import re
+from collections import Counter
+
+def train_frequency(train_words, train_tags):
+    # Returns dictionary key:value --> word: tag
+    # tag = most frequently ocurring tag for word in the train set
+
+    final = dict()
+    # loop through train words
+    # for every tag, add it to final[word][tag] count
+    # return dict containing most frequent counts
+
+    #print(train_words)
+    #print(train_tags)
+
+    zipped = zip(train_words, train_tags)
+    #print(tuple(zipped))
+    d = Counter(zipped)
+    #print("\n")
+    #print(d)
+    #print("\n")
+    for word, tag in d:
+        #d = Counter(zip(train_words[i], train_tags[i]))
+        #print(d[word, tag])
+        tag_count = d[word, tag]
+        if word not in final.keys():
+            # if word has not been added to final dict yet
+            final[word] = {tag:tag_count}
+        elif final.get(word).get(tag):
+            final[word][tag] += 1 # if already in final dict, count++
+
+    #print(final)
+
+    return final
 
 def tag(training_list, test_file, output_file):
     # Tag the words from the untagged input file and write them into the output file.
@@ -21,9 +54,10 @@ def tag(training_list, test_file, output_file):
             train_tags.append(re.split(' : ', line)[1])
             #train_tags.append()
             #print(line)
-            break
-    #print(train_words)
-    #print(train_tags)
+            #break
+
+    train_frequency(train_words, train_tags)
+
 
 
 
